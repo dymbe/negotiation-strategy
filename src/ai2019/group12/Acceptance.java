@@ -39,38 +39,24 @@ public class Acceptance extends AcceptanceStrategy {
 			a = 0.95;
 		}
 	}
-	
-	private Boolean isBetterThanNext() {
-		double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getLastBidDetails().getMyUndiscountedUtil();
-		double nextMyBidUtil = offeringStrategy.getNextBid()
-				.getMyUndiscountedUtil();
-		return lastOpponentBidUtil >= nextMyBidUtil;
-	}
-	
-	private Boolean isBetterThanMyWorst() {
-		double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getLastBidDetails().getMyUndiscountedUtil();
-		double myWorstBidUtility = negotiationSession.getOwnBidHistory()
-				.getWorstBidDetails().getMyUndiscountedUtil();
-		return lastOpponentBidUtil >= myWorstBidUtility;
-	}
-	
-	private Boolean isEnoughTimePassed() {
-		return negotiationSession.getTime() >= timeThreshold; 
-	}
-	
-	private Boolean isLastResort() {
-		double bestOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getBestBidDetails().getMyUndiscountedUtil();
-		double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getLastBidDetails().getMyUndiscountedUtil();
-		return a * bestOpponentBidUtil < lastOpponentBidUtil;
-	}
 
 	@Override
 	public Actions determineAcceptability() {
-		if (isBetterThanNext() || isBetterThanMyWorst() || (isEnoughTimePassed() && isLastResort())) {
+		double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
+				.getLastBidDetails().getMyUndiscountedUtil();
+		double bestOpponentBidUtil = negotiationSession.getOpponentBidHistory()
+				.getBestBidDetails().getMyUndiscountedUtil();
+		double nextMyBidUtil = offeringStrategy.getNextBid()
+				.getMyUndiscountedUtil();
+		double myWorstBidUtil = negotiationSession.getOwnBidHistory()
+				.getWorstBidDetails().getMyUndiscountedUtil();
+		
+		boolean isBetterThanNext = lastOpponentBidUtil >= nextMyBidUtil;
+		boolean isBetterThanMyWorst = lastOpponentBidUtil >= myWorstBidUtil;
+		boolean isGoodLastResort = negotiationSession.getTime() >= timeThreshold &&
+				a * bestOpponentBidUtil < lastOpponentBidUtil;
+		
+		if (isBetterThanNext || isBetterThanMyWorst || isGoodLastResort) {
 			return Actions.Accept;
 		} else {
 			return Actions.Reject;
