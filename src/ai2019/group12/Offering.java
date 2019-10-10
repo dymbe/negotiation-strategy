@@ -1,6 +1,5 @@
 package ai2019.group12;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,15 +9,14 @@ import genius.core.boaframework.NoModel;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
-//import sun.awt.shell.Win32ShellFolder2.SystemIcon;
 import genius.core.misc.*;
+import genius.core.boaframework.SortedOutcomeSpace;
 
 public class Offering extends OfferingStrategy {
 
 	private double time_threshold = 0.95;
 	private double utility_threshold = 0.95;
-
-
+	private int counter = 0;
 	
 	public Offering() {
 	}
@@ -32,6 +30,8 @@ public class Offering extends OfferingStrategy {
 			OMStrategy omStrat, Map<String, Double> parameters)
 			throws Exception {
 		this.negotiationSession = negoSession;
+		SortedOutcomeSpace space = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
+		negotiationSession.setOutcomeSpace(space);
 	}
 	
 	@Override
@@ -48,15 +48,13 @@ public class Offering extends OfferingStrategy {
 		
 		if (!(opponentModel instanceof NoModel)) {
 			if (time <= time_threshold) {
-				//next_bid =
-				bids_above_threshold();
-				
+				nextBid = bids_above_threshold();
 			}
 
 			
 			
 		} else {
-			
+			nextBid = last_moment_bids();
 			
 		}
 		return nextBid;
@@ -64,19 +62,25 @@ public class Offering extends OfferingStrategy {
 	}
 	
 
-	public void bids_above_threshold() {
+	public BidDetails bids_above_threshold() {
 		
 		Range our_range = new Range(negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil()*utility_threshold, negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil()+0.1) ;
+				
+		System.out.println("range: " + our_range);
 		
-		//List<BidDetails> possible_bids = negotiationSession.getOutcomeSpace().getBidsinRange(our_range) ;
+		List<BidDetails> possible_bids = negotiationSession.getOutcomeSpace().getBidsinRange(our_range);
+	
+		System.out.println(possible_bids.size());
 		
-		System.out.print(negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil()*utility_threshold);
-		System.out.print(negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil());
-		//System.out.print(negotiationSession.getOutcomeSpace().getBidsinRange(our_range));
+		int round = (int) negotiationSession.getTimeline().getCurrentTime();
 		
-		
+		return possible_bids.get(round % possible_bids.size());
 	}
 	
+	public BidDetails last_moment_bids() {
+		
+		return null;
+	}
 	
 	@Override
 	public String getName() {
