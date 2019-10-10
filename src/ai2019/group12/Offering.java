@@ -26,7 +26,7 @@ public class Offering extends OfferingStrategy {
 	
 	@Override
 	public BidDetails determineOpeningBid() {
-		return negotiationSession.getMaxBidinDomain();
+		return negotiationSession.getMinBidinDomain();
 	}
 
 	@Override
