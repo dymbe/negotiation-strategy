@@ -14,9 +14,8 @@ import genius.core.boaframework.SortedOutcomeSpace;
 
 public class Offering extends OfferingStrategy {
 
-	private double time_threshold = 0.95;
-	private double utility_threshold = 0.95;
-	private int counter = 0;
+	private double timeThreshold = 0.95;
+	private double utilityThreshold = 0.95;
 	
 	public Offering() {
 	}
@@ -26,10 +25,10 @@ public class Offering extends OfferingStrategy {
 	}
 	
 	@Override
-	public void init(NegotiationSession negoSession, OpponentModel om,
+	public void init(NegotiationSession negotiationSession, OpponentModel om,
 			OMStrategy omStrat, Map<String, Double> parameters)
 			throws Exception {
-		this.negotiationSession = negoSession;
+		this.negotiationSession = negotiationSession;
 		SortedOutcomeSpace space = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(space);
 	}
@@ -42,19 +41,15 @@ public class Offering extends OfferingStrategy {
 	@Override
 	public BidDetails determineNextBid() {
 		double time = negotiationSession.getTime();
-		double relative_util_threshold = utility_threshold*negotiationSession.
-				getMaxBidinDomain().getMyUndiscountedUtil();
+		/*double relativeUtilThreshold = utilityThreshold*negotiationSession.
+				getMaxBidinDomain().getMyUndiscountedUtil(); Delete this? */
 	
-		
 		if (!(opponentModel instanceof NoModel)) {
-			if (time <= time_threshold) {
-				nextBid = bids_above_threshold();
+			if (time <= timeThreshold) {
+				nextBid = getBidAboveThreshold();
 			}
-
-			
-			
 		} else {
-			nextBid = last_moment_bids();
+			nextBid = getLastMomentBid();
 			
 		}
 		return nextBid;
@@ -62,23 +57,20 @@ public class Offering extends OfferingStrategy {
 	}
 	
 
-	public BidDetails bids_above_threshold() {
+	public BidDetails getBidAboveThreshold() {
+		double lowerBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() * utilityThreshold;
+		double upperBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() + 0.1;
 		
-		Range our_range = new Range(negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil()*utility_threshold, negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil()+0.1) ;
-				
-		System.out.println("range: " + our_range);
-		
-		List<BidDetails> possible_bids = negotiationSession.getOutcomeSpace().getBidsinRange(our_range);
+		List<BidDetails> possibleBids = negotiationSession
+				.getOutcomeSpace()
+				.getBidsinRange(new Range(lowerBound, upperBound));
 	
-		System.out.println(possible_bids.size());
+		int currentRound = (int) negotiationSession.getTimeline().getCurrentTime();
 		
-		int round = (int) negotiationSession.getTimeline().getCurrentTime();
-		
-		return possible_bids.get(round % possible_bids.size());
+		return possibleBids.get(currentRound % possibleBids.size());
 	}
 	
-	public BidDetails last_moment_bids() {
-		
+	public BidDetails getLastMomentBid() {
 		return null;
 	}
 	
