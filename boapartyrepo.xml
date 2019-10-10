@@ -47,4 +47,19 @@
             <item classpath="negotiator.boaframework.omstrategy.NTFTstrategy"/>
         </omStrategy>
     </boaparties>
+    <boaparties partyName="BraindeadCabbage1.1">
+        <properties/>
+        <biddingStrategy>
+            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Offering.class"/>
+        </biddingStrategy>
+        <acceptanceStrategy>
+            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Acceptance.class"/>
+        </acceptanceStrategy>
+        <opponentModel>
+            <item classpath="negotiator.boaframework.opponentmodel.AgentLGModel"/>
+        </opponentModel>
+        <omStrategy>
+            <item classpath="negotiator.boaframework.omstrategy.NTFTstrategy"/>
+        </omStrategy>
+    </boaparties>
 </boaPartiesList>

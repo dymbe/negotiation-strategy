@@ -48,13 +48,15 @@ public class Acceptance extends AcceptanceStrategy {
 				.getBestBidDetails().getMyUndiscountedUtil();
 		double nextMyBidUtil = offeringStrategy.getNextBid()
 				.getMyUndiscountedUtil();
-		double myWorstBidUtil = negotiationSession.getOwnBidHistory()
-				.getWorstBidDetails().getMyUndiscountedUtil();
-		
 		boolean isBetterThanNext = lastOpponentBidUtil >= nextMyBidUtil;
-		boolean isBetterThanMyWorst = lastOpponentBidUtil >= myWorstBidUtil;
 		boolean isGoodLastResort = negotiationSession.getTime() >= timeThreshold &&
 				a * bestOpponentBidUtil < lastOpponentBidUtil;
+		
+		boolean isBetterThanMyWorst = false;
+		if (negotiationSession.getOwnBidHistory().getWorstBidDetails() != null) { 
+			isBetterThanMyWorst = lastOpponentBidUtil >= negotiationSession.getOwnBidHistory()
+					.getWorstBidDetails().getMyUndiscountedUtil();;
+		}
 		
 		if (isBetterThanNext || isBetterThanMyWorst || isGoodLastResort) {
 			return Actions.Accept;
@@ -65,7 +67,7 @@ public class Acceptance extends AcceptanceStrategy {
 
 	@Override
 	public String getName() {
-		return "BraindeadCabbage";
+		return "BraindeadCabbageAS";
 	}
 
 }
