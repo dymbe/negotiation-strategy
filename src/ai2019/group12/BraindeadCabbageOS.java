@@ -13,17 +13,20 @@ import genius.core.boaframework.OpponentModel;
 import genius.core.misc.*;
 import genius.core.boaframework.SortedOutcomeSpace;
 
-public class Offering extends OfferingStrategy {
+public class BraindeadCabbageOS extends OfferingStrategy {
 
 	private double timeThreshold = 0.90;
 	private double utilityThreshold = 0.95;
 	private double finalUtilityTreshhold = 0.7;
 	private Random random = new Random(1337);
 	
-	public Offering() {
+	/**
+	 * Empty constructor for the BOA framework.
+	 */
+	public BraindeadCabbageOS() {
 	}
 
-	public Offering(NegotiationSession negotiationSession) {
+	public BraindeadCabbageOS(NegotiationSession negotiationSession) {
 		this.negotiationSession = negotiationSession;
 	}
 	
@@ -45,12 +48,10 @@ public class Offering extends OfferingStrategy {
 	public BidDetails determineNextBid() {
 		double time = negotiationSession.getTime();
 	
-		if (!(opponentModel instanceof NoModel)) {
-			if (time <= timeThreshold) {
-				nextBid = getBidAboveThreshold();
-			} else {
-				nextBid = getLastMomentBid();
-			}
+		if (time <= timeThreshold) {
+			nextBid = getBidAboveThreshold();
+		} else {
+			nextBid = getLastMomentBid();
 		}
 		
 		return nextBid;
@@ -63,10 +64,7 @@ public class Offering extends OfferingStrategy {
 				.getBidsinRange(new Range(lowerBound, 1.1));
 	}
 
-	public BidDetails getBidAboveThreshold() {
-		// double lowerBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() * utilityThreshold;
-		
-		// Works if we assume best bid gives 1 in utility
+	private BidDetails getBidAboveThreshold() { 
 		List<BidDetails> possibleBids = getBidOver(utilityThreshold);
 		
 		int currentRound = (int) negotiationSession.getTimeline().getCurrentTime();

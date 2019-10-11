@@ -8,7 +8,7 @@ import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 
-public class Acceptance extends AcceptanceStrategy {
+public class BraindeadCabbageAS extends AcceptanceStrategy {
 	
 	private double timeThreshold;
 	private double a;
@@ -16,20 +16,20 @@ public class Acceptance extends AcceptanceStrategy {
 	/**
 	 * Empty constructor for the BOA framework.
 	 */
-	public Acceptance() {
+	public BraindeadCabbageAS() {
 	}
 
-	public Acceptance(NegotiationSession negotiationSession, OfferingStrategy strat) {
+	public BraindeadCabbageAS(NegotiationSession negotiationSession, OfferingStrategy strat) {
 		this.negotiationSession = negotiationSession;
 		this.offeringStrategy = strat;
 	}
 	
 	@Override
-	public void init(NegotiationSession negoSession, OfferingStrategy strat,
+	public void init(NegotiationSession negotiationSession, OfferingStrategy os,
 			OpponentModel opponentModel, Map<String, Double> parameters)
 			throws Exception {
-		this.negotiationSession = negoSession;
-		this.offeringStrategy = strat;
+		this.negotiationSession = negotiationSession;
+		this.offeringStrategy = os;
 		
 		if (parameters.get("timeThreshold") != null || parameters.get("a") != null) {
 			timeThreshold = parameters.get("timeThreshold");

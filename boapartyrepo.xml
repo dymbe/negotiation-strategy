@@ -1,59 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <boaPartiesList>
-    <boaparties partyName="newParty">
-        <properties/>
-        <biddingStrategy>
-            <item classpath="negotiator.boaframework.offeringstrategy.anac2010.AgentK_Offering"/>
-        </biddingStrategy>
-        <acceptanceStrategy>
-            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Acceptance.class"/>
-        </acceptanceStrategy>
-        <opponentModel>
-            <item classpath="negotiator.boaframework.opponentmodel.AgentLGModel"/>
-        </opponentModel>
-        <omStrategy>
-            <item classpath="negotiator.boaframework.omstrategy.NTFTstrategy"/>
-        </omStrategy>
-    </boaparties>
     <boaparties partyName="BraindeadCabbage">
         <properties/>
         <biddingStrategy>
-            <item classpath="negotiator.boaframework.offeringstrategy.anac2012.BRAMAgent2_Offering"/>
+            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/BraindeadCabbageOS.class"/>
         </biddingStrategy>
         <acceptanceStrategy>
-            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Acceptance.class"/>
-        </acceptanceStrategy>
-        <opponentModel>
-            <item classpath="negotiator.boaframework.opponentmodel.AgentLGModel"/>
-        </opponentModel>
-        <omStrategy>
-            <item classpath="negotiator.boaframework.omstrategy.NTFTstrategy"/>
-        </omStrategy>
-    </boaparties>
-    <boaparties partyName="HardbrainedCabbage">
-        <properties/>
-        <biddingStrategy>
-            <item classpath="negotiator.boaframework.offeringstrategy.anac2011.HardHeaded_Offering"/>
-        </biddingStrategy>
-        <acceptanceStrategy>
-            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Acceptance.class"/>
-        </acceptanceStrategy>
-        <opponentModel>
-            <parameters name="u" value="0.0"/>
-            <parameters name="b" value="1.0"/>
-            <item classpath="negotiator.boaframework.opponentmodel.IAMhagglerBayesianModel"/>
-        </opponentModel>
-        <omStrategy>
-            <item classpath="negotiator.boaframework.omstrategy.NTFTstrategy"/>
-        </omStrategy>
-    </boaparties>
-    <boaparties partyName="BraindeadCabbage1.1">
-        <properties/>
-        <biddingStrategy>
-            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Offering.class"/>
-        </biddingStrategy>
-        <acceptanceStrategy>
-            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/Acceptance.class"/>
+            <item classpath="/home/erik/eclipse-workspace/genius-stuff/bin/ai2019/group12/BraindeadCabbageAS.class"/>
         </acceptanceStrategy>
         <opponentModel>
             <item classpath="negotiator.boaframework.opponentmodel.AgentLGModel"/>
