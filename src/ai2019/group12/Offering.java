@@ -2,6 +2,7 @@ package ai2019.group12;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
@@ -14,8 +15,10 @@ import genius.core.boaframework.SortedOutcomeSpace;
 
 public class Offering extends OfferingStrategy {
 
-	private double timeThreshold = 0.95;
+	private double timeThreshold = 0.90;
 	private double utilityThreshold = 0.95;
+	private double finalUtilityTreshhold = 0.7;
+	private Random random = new Random(1337);
 	
 	public Offering() {
 	}
@@ -41,37 +44,43 @@ public class Offering extends OfferingStrategy {
 	@Override
 	public BidDetails determineNextBid() {
 		double time = negotiationSession.getTime();
-		/*double relativeUtilThreshold = utilityThreshold*negotiationSession.
-				getMaxBidinDomain().getMyUndiscountedUtil(); Delete this? */
 	
 		if (!(opponentModel instanceof NoModel)) {
 			if (time <= timeThreshold) {
 				nextBid = getBidAboveThreshold();
+			} else {
+				nextBid = getLastMomentBid();
 			}
-		} else {
-			nextBid = getLastMomentBid();
-			
 		}
+		
 		return nextBid;
 		
 	}
 	
+	private List<BidDetails> getBidOver(double lowerBound) {
+		return negotiationSession
+				.getOutcomeSpace()
+				.getBidsinRange(new Range(lowerBound, 1.1));
+	}
 
 	public BidDetails getBidAboveThreshold() {
-		double lowerBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() * utilityThreshold;
-		double upperBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() + 0.1;
+		// double lowerBound = negotiationSession.getMaxBidinDomain().getMyUndiscountedUtil() * utilityThreshold;
 		
-		List<BidDetails> possibleBids = negotiationSession
-				.getOutcomeSpace()
-				.getBidsinRange(new Range(lowerBound, upperBound));
-	
+		// Works if we assume best bid gives 1 in utility
+		List<BidDetails> possibleBids = getBidOver(utilityThreshold);
+		
 		int currentRound = (int) negotiationSession.getTimeline().getCurrentTime();
 		
 		return possibleBids.get(currentRound % possibleBids.size());
 	}
 	
 	public BidDetails getLastMomentBid() {
-		return null;
+		double timeOfLastMoment = (negotiationSession.getTime() - timeThreshold) / (1 - timeThreshold);
+		double lowerBound = utilityThreshold - (utilityThreshold - finalUtilityTreshhold) * timeOfLastMoment;
+		
+		List<BidDetails> possibleBids = getBidOver(lowerBound);
+		
+		return possibleBids.get(random.nextInt(possibleBids.size()));
 	}
 	
 	@Override

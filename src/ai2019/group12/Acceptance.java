@@ -35,7 +35,7 @@ public class Acceptance extends AcceptanceStrategy {
 			timeThreshold = parameters.get("timeThreshold");
 			a = parameters.get("a");
 		} else {
-			timeThreshold = 0.95;
+			timeThreshold = 0.99;
 			a = 0.95;
 		}
 	}
