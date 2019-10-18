@@ -6,7 +6,6 @@ import java.util.Random;
 
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
-import genius.core.boaframework.NoModel;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
