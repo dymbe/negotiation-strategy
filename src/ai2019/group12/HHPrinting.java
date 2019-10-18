@@ -27,7 +27,7 @@ import genius.core.utility.EvaluatorDiscrete;
  * 
  * paper: https://ii.tudelft.nl/sites/default/files/boa.pdf
  */
-public class HardHeadedFrequencyModel extends OpponentModel {
+public class HHPrinting extends OpponentModel {
 
 	/*
 	 * the learning coefficient is the weight that is added each turn to the
@@ -106,7 +106,7 @@ public class HardHeadedFrequencyModel extends OpponentModel {
 				newWeight = weight / totalSum;
 			}
 			
-			System.out.println("issue: "+issue+" weight: "+newWeight);
+			System.out.println("\nissue: "+issue+" weight: "+newWeight);
 			opponentUtilitySpace.setWeight(issue, newWeight);
 		}
 
@@ -126,7 +126,7 @@ public class HardHeadedFrequencyModel extends OpponentModel {
 				Integer eval = value.getEvaluationNotNormalized(issuevalue);
 				value.setEvaluation(issuevalue, (learnValueAddition + eval));
 				
-				System.out.println( "issue: "+issue+"value "+value);
+				System.out.println( "issue: "+issue+" value "+value);
 			}
 		
 		} catch (Exception ex) {
