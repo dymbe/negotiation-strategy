@@ -1,10 +1,13 @@
 package ai2019.group12;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import genius.core.Bid;
 import genius.core.bidding.BidDetails;
@@ -35,25 +38,17 @@ public class BraindeadCabbageOM extends OpponentModel {
 	 * issue weights which changed. It's a trade-off between concession speed
 	 * and accuracy.
 	 */
-	private double epsilon;
 	/*
 	 * value which is added to a value if it is found. Determines how fast the
 	 * value weights converge.
 	 */
-	private int learnValueAddition;
 	private int amountOfIssues;
-	private double epsilonNorm;
 
 	@Override
 	public void init(NegotiationSession negotiationSession,
 			Map<String, Double> parameters) {
 		this.negotiationSession = negotiationSession;
-		if (parameters != null && parameters.get("l") != null) {
-			epsilon = parameters.get("l");
-		} else {
-			epsilon = 0.2;
-		}
-		learnValueAddition = 1;
+		
 		opponentUtilitySpace = (AdditiveUtilitySpace) negotiationSession
 				.getUtilitySpace().copy();
 		amountOfIssues = opponentUtilitySpace.getDomain().getIssues().size();
@@ -62,10 +57,21 @@ public class BraindeadCabbageOM extends OpponentModel {
 		 * normalization. Also the value that is taken as the minimum possible
 		 * weight, (therefore defining the maximum possible also).
 		 */
-		epsilonNorm = epsilon / amountOfIssues;
-
+		
 		initializeModel();
 
+	}
+	
+	private double getEpsilonNormalized() {
+		return 0.3 - 0.2 * Math.pow(negotiationSession.getTime(), 2) / amountOfIssues;
+	}
+	
+	private int getLearnValueAddition() {
+		return (int) ((1 - negotiationSession.getTime()) * 3 + 1);
+	}
+	
+	public static void main(String[] args) {
+		System.out.println((int) ((1 - 0) * 3 + 1));
 	}
 
 	@Override
@@ -90,43 +96,81 @@ public class BraindeadCabbageOM extends OpponentModel {
 		}
 
 		// The total sum of weights before normalization.
-		double totalSum = 1D + epsilonNorm * numberOfUnchanged;
+		double totalSum = 1D + getEpsilonNormalized() * numberOfUnchanged;
 		// The maximum possible weight
-		double maximumWeight = 1D - (amountOfIssues) * epsilonNorm / totalSum;
+		double maximumWeight = 1D - (amountOfIssues) * getEpsilonNormalized() / totalSum;
 
+		List<Double> weights = new ArrayList<>();
+		double total = 0;
 		// re-weighing issues while making sure that the sum remains 1
 		for (Integer i : lastDiffSet.keySet()) {
+
 			Objective issue = opponentUtilitySpace.getDomain()
 					.getObjectivesRoot().getObjective(i);
 			double weight = opponentUtilitySpace.getWeight(i);
-			double newWeight;
 
-			if (lastDiffSet.get(i) == 0 && weight < maximumWeight) {
-				newWeight = (weight + epsilonNorm) / totalSum;
-			} else {
-				newWeight = weight / totalSum;
+			if (lastDiffSet.get(i) == 0) {
+				weight = (weight + getEpsilonNormalized());
 			}
-			opponentUtilitySpace.setWeight(issue, newWeight);
+			weights.add(weight);
+			
+			total += weight;
 		}
+		
+		double normalizedTotal = 0;
+		Integer index = 0;
+		for (Integer i : lastDiffSet.keySet()) {
+			
+			double weight = weights.get(index) / total;
+			Objective issue = opponentUtilitySpace.getDomain()
+					.getObjectivesRoot().getObjective(i);
+			opponentUtilitySpace.setWeight(issue, weight);
+			//System.out.println("\nissue: "+issue+" weight: "+weight);
+			normalizedTotal += weight;
+			index++;
+		}
+		
+		//System.out.println(normalizedTotal);
+	
 
 		// Then for each issue value that has been offered last time, a constant
 		// value is added to its corresponding ValueDiscrete.
-		try {
-			for (Entry<Objective, Evaluator> e : opponentUtilitySpace
-					.getEvaluators()) {
-				EvaluatorDiscrete value = (EvaluatorDiscrete) e.getValue();
-				IssueDiscrete issue = ((IssueDiscrete) e.getKey());
-				/*
-				 * add constant learnValueAddition to the current preference of
-				 * the value to make it more important
-				 */
-				ValueDiscrete issuevalue = (ValueDiscrete) oppBid.getBid()
-						.getValue(issue.getNumber());
-				Integer eval = value.getEvaluationNotNormalized(issuevalue);
-				value.setEvaluation(issuevalue, (learnValueAddition + eval));
+		
+		System.out.println("Round: " + negotiationSession.getTimeline().getCurrentTime() + ", Contains: " + negotiationSession.getOpponentBidHistory().getHistory().subList(0, negotiationSession.getOpponentBidHistory().getHistory().size() - 2).stream().map(bid -> bid.getBid()).collect(Collectors.toList()).contains(negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid()));
+		
+		if (!negotiationSession
+				.getOpponentBidHistory()
+				.getHistory()
+				.subList(0, negotiationSession
+						.getOpponentBidHistory()
+						.getHistory()
+						.size() - 2)
+				.stream()
+				.map(bid -> bid.getBid())
+				.collect(Collectors.toList())
+				.contains(negotiationSession
+						.getOpponentBidHistory()
+						.getLastBidDetails()
+						.getBid())) {
+			try {
+				for (Entry<Objective, Evaluator> e : opponentUtilitySpace
+						.getEvaluators()) {
+					EvaluatorDiscrete value = (EvaluatorDiscrete) e.getValue();
+					IssueDiscrete issue = ((IssueDiscrete) e.getKey());
+					/*
+					 * add constant learnValueAddition to the current preference of
+					 * the value to make it more important
+					 */
+					ValueDiscrete issuevalue = (ValueDiscrete) oppBid.getBid()
+							.getValue(issue.getNumber());
+					Integer eval = value.getEvaluationNotNormalized(issuevalue);
+					System.out.println("\nNewValue: " + getLearnValueAddition() + "\n");
+					value.setEvaluation(issuevalue, (getLearnValueAddition() + eval));
+					System.out.println( "issue: "+issue+" value "+value);
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
 		}
 	}
 
@@ -143,7 +187,7 @@ public class BraindeadCabbageOM extends OpponentModel {
 
 	@Override
 	public String getName() {
-		return "HardHeaded Frequency Model";
+		return "BraindeadCabbageOM";
 	}
 
 	@Override
