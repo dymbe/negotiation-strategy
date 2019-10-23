@@ -69,10 +69,6 @@ public class BraindeadCabbageOM extends OpponentModel {
 	private int getLearnValueAddition() {
 		return (int) ((1 - negotiationSession.getTime()) * 3 + 1);
 	}
-	
-	public static void main(String[] args) {
-		System.out.println((int) ((1 - 0) * 3 + 1));
-	}
 
 	@Override
 	public void updateModel(Bid opponentBid, double time) {
@@ -136,8 +132,6 @@ public class BraindeadCabbageOM extends OpponentModel {
 		// Then for each issue value that has been offered last time, a constant
 		// value is added to its corresponding ValueDiscrete.
 		
-		System.out.println("Round: " + negotiationSession.getTimeline().getCurrentTime() + ", Contains: " + negotiationSession.getOpponentBidHistory().getHistory().subList(0, negotiationSession.getOpponentBidHistory().getHistory().size() - 2).stream().map(bid -> bid.getBid()).collect(Collectors.toList()).contains(negotiationSession.getOpponentBidHistory().getLastBidDetails().getBid()));
-		
 		if (!negotiationSession
 				.getOpponentBidHistory()
 				.getHistory()
@@ -164,9 +158,7 @@ public class BraindeadCabbageOM extends OpponentModel {
 					ValueDiscrete issuevalue = (ValueDiscrete) oppBid.getBid()
 							.getValue(issue.getNumber());
 					Integer eval = value.getEvaluationNotNormalized(issuevalue);
-					System.out.println("\nNewValue: " + getLearnValueAddition() + "\n");
 					value.setEvaluation(issuevalue, (getLearnValueAddition() + eval));
-					System.out.println( "issue: "+issue+" value "+value);
 				}
 			} catch (Exception ex) {
 				ex.printStackTrace();

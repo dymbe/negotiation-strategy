@@ -35,6 +35,7 @@ public class BraindeadCabbageOS extends OfferingStrategy {
 			OMStrategy omStrat, Map<String, Double> parameters)
 			throws Exception {
 		this.negotiationSession = negotiationSession;
+		this.omStrategy = omStrat;
 		SortedOutcomeSpace space = new SortedOutcomeSpace(negotiationSession.getUtilitySpace());
 		negotiationSession.setOutcomeSpace(space);
 	}
@@ -51,7 +52,7 @@ public class BraindeadCabbageOS extends OfferingStrategy {
 		if (time <= timeThreshold) {
 			nextBid = getBidAboveThreshold();
 		}
-		else if (!(opponentModel instanceof NoModel)){			
+		else if (!(opponentModel instanceof NoModel)){
 			nextBid = omStrategy.getBid(negotiationSession.getOutcomeSpace(), getRange());
 		}
 		else {
