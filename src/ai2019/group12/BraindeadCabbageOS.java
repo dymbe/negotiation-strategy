@@ -6,6 +6,7 @@ import java.util.Random;
 
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
+import genius.core.boaframework.NoModel;
 import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
@@ -49,12 +50,22 @@ public class BraindeadCabbageOS extends OfferingStrategy {
 	
 		if (time <= timeThreshold) {
 			nextBid = getBidAboveThreshold();
-		} else {
+		}
+		else if (!(opponentModel instanceof NoModel)){			
+			nextBid = omStrategy.getBid(negotiationSession.getOutcomeSpace(), getRange());
+		}
+		else {
 			nextBid = getLastMomentBid();
 		}
 		
 		return nextBid;
 		
+	}
+	
+	private Range getRange() {
+		double timeOfLastMoment = (negotiationSession.getTime() - timeThreshold) / (1 - timeThreshold);
+		double lowerBound = utilityThreshold - (utilityThreshold - finalUtilityTreshhold) * timeOfLastMoment;
+		return new Range(lowerBound, 1.1);
 	}
 	
 	private List<BidDetails> getBidOver(double lowerBound) {
