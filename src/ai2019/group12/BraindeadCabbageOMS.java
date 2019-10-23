@@ -14,11 +14,9 @@ public class BraindeadCabbageOMS extends OMStrategy {
 	@Override
 	public BidDetails getBid(List<BidDetails> bidsInRange) {
 		bidsInRange.sort((bid1, bid2) -> {
-			double bid1utility = model.getOpponentUtilitySpace().getUtility(bid1.getBid());
-			double bid2utility = model.getOpponentUtilitySpace().getUtility(bid2.getBid());
-			if (bid1utility < bid2utility) return 1;
-			else if (bid1utility == bid2utility) return 0;
-			else return -1;
+			Double utility1 = model.getOpponentUtilitySpace().getUtility(bid1.getBid());
+			Double utility2 = model.getOpponentUtilitySpace().getUtility(bid2.getBid());
+			return utility2.compareTo(utility1);
 		});
 				
 		int toIndex = (int) (bidsInRange.size() * (1 - opponentUilityPercentageThreshold)) + 1;
