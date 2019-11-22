@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import genius.core.Bid;
 import genius.core.bidding.BidDetails;
@@ -74,6 +75,7 @@ public class BraindeadCabbageOM extends OpponentModel {
 		if (negotiationSession.getOpponentBidHistory().size() < 2) {
 			return;
 		}
+		int numberOfUnchanged = 0;
 		BidDetails oppBid = negotiationSession.getOpponentBidHistory()
 				.getHistory()
 				.get(negotiationSession.getOpponentBidHistory().size() - 1);
@@ -83,10 +85,24 @@ public class BraindeadCabbageOM extends OpponentModel {
 		HashMap<Integer, Integer> lastDiffSet = determineDifference(prevOppBid,
 				oppBid);
 
+		// count the number of changes in value
+		for (Integer i : lastDiffSet.keySet()) {
+			if (lastDiffSet.get(i) == 0)
+				numberOfUnchanged++;
+		}
+
+		// The total sum of weights before normalization.
+		double totalSum = 1D + getEpsilonNormalized() * numberOfUnchanged;
+		// The maximum possible weight
+		double maximumWeight = 1D - (amountOfIssues) * getEpsilonNormalized() / totalSum;
+
 		List<Double> weights = new ArrayList<>();
 		double total = 0;
 		// re-weighing issues while making sure that the sum remains 1
 		for (Integer i : lastDiffSet.keySet()) {
+
+			Objective issue = opponentUtilitySpace.getDomain()
+					.getObjectivesRoot().getObjective(i);
 			double weight = opponentUtilitySpace.getWeight(i);
 
 			if (lastDiffSet.get(i) == 0) {
@@ -97,6 +113,7 @@ public class BraindeadCabbageOM extends OpponentModel {
 			total += weight;
 		}
 		
+		double normalizedTotal = 0;
 		Integer index = 0;
 		for (Integer i : lastDiffSet.keySet()) {
 			
@@ -104,9 +121,17 @@ public class BraindeadCabbageOM extends OpponentModel {
 			Objective issue = opponentUtilitySpace.getDomain()
 					.getObjectivesRoot().getObjective(i);
 			opponentUtilitySpace.setWeight(issue, weight);
+			//System.out.println("\nissue: "+issue+" weight: "+weight);
+			normalizedTotal += weight;
 			index++;
 		}
-				
+		
+		//System.out.println(normalizedTotal);
+	
+
+		// Then for each issue value that has been offered last time, a constant
+		// value is added to its corresponding ValueDiscrete.
+		
 		if (!negotiationSession
 				.getOpponentBidHistory()
 				.getHistory()
@@ -115,18 +140,17 @@ public class BraindeadCabbageOM extends OpponentModel {
 						.getHistory()
 						.size() - 2)
 				.stream()
-				.anyMatch(bid -> bid
-						.getBid()
-						.equals(negotiationSession
-								.getOpponentBidHistory()
-								.getLastBidDetails()
-								.getBid()))) {
+				.map(bid -> bid.getBid())
+				.collect(Collectors.toList())
+				.contains(negotiationSession
+						.getOpponentBidHistory()
+						.getLastBidDetails()
+						.getBid())) {
 			try {
 				for (Entry<Objective, Evaluator> e : opponentUtilitySpace
 						.getEvaluators()) {
 					EvaluatorDiscrete value = (EvaluatorDiscrete) e.getValue();
 					IssueDiscrete issue = ((IssueDiscrete) e.getKey());
-					
 					/*
 					 * add constant learnValueAddition to the current preference of
 					 * the value to make it more important
