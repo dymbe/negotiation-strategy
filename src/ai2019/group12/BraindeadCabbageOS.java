@@ -93,29 +93,32 @@ public class BraindeadCabbageOS extends OfferingStrategy {
 		}
 	}
 	
-	/**
-	 * @return a Range of acceptable utilities
-	 */
 	private Range getRange() {
 		double timeOfLastMoment = (negotiationSession.getTime() - timeThreshold) / (1 - timeThreshold);
 		double lowerBound = utilityThreshold - (utilityThreshold - finalUtilityTreshhold) * timeOfLastMoment;
 		return new Range(lowerBound, 1.1);
 	}
 	
-	private List<BidDetails> getBidsOver(double lowerBound) {
+	private List<BidDetails> getBidOver(double lowerBound) {
 		return negotiationSession
 				.getOutcomeSpace()
 				.getBidsinRange(new Range(lowerBound, 1.1));
 	}
 
 	private BidDetails getBidAboveThreshold() { 
-		List<BidDetails> possibleBids = getBidsOver(utilityThreshold);
+		List<BidDetails> possibleBids = getBidOver(utilityThreshold);
+		
 		int currentRound = (int) negotiationSession.getTimeline().getCurrentTime();
+		
 		return possibleBids.get(currentRound % possibleBids.size());
 	}
 	
 	public BidDetails getLastMomentBid() {
-		List<BidDetails> possibleBids = getBidsOver(getRange().getLowerbound());
+		double timeOfLastMoment = (negotiationSession.getTime() - timeThreshold) / (1 - timeThreshold);
+		double lowerBound = utilityThreshold - (utilityThreshold - finalUtilityTreshhold) * timeOfLastMoment;
+		
+		List<BidDetails> possibleBids = getBidOver(lowerBound);
+		
 		return possibleBids.get(random.nextInt(possibleBids.size()));
 	}
 	
