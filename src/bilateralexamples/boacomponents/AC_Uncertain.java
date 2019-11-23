@@ -29,6 +29,8 @@ public class AC_Uncertain extends AcceptanceStrategy {
 		}
 
 		UserModel userModel = negotiationSession.getUserModel();
+		
+		//uncertain
 		if (userModel != null) {
 			List<Bid> bidOrder = userModel.getBidRanking().getBidOrder();
 			if (bidOrder.contains(receivedBid)) {

@@ -1,12 +1,15 @@
 package ai2019.group12;
 
+import java.util.List;
 import java.util.Map;
 
+import genius.core.Bid;
 import genius.core.boaframework.AcceptanceStrategy;
 import genius.core.boaframework.Actions;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
+import genius.core.uncertainty.UserModel;
 
 public class BraindeadCabbageAS extends AcceptanceStrategy {
 	
@@ -42,27 +45,48 @@ public class BraindeadCabbageAS extends AcceptanceStrategy {
 
 	@Override
 	public Actions determineAcceptability() {
-		double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getLastBidDetails().getMyUndiscountedUtil();
-		double bestOpponentBidUtil = negotiationSession.getOpponentBidHistory()
-				.getBestBidDetails().getMyUndiscountedUtil();
-		double nextMyBidUtil = offeringStrategy.getNextBid()
-				.getMyUndiscountedUtil();
-		boolean isBetterThanNext = lastOpponentBidUtil >= nextMyBidUtil;
-		boolean isGoodLastResort = negotiationSession.getTime() >= timeThreshold &&
-				a * bestOpponentBidUtil < lastOpponentBidUtil;
 		
-		boolean isBetterThanMyWorst = false;
-		if (negotiationSession.getOwnBidHistory().getWorstBidDetails() != null) { 
-			isBetterThanMyWorst = lastOpponentBidUtil >= negotiationSession.getOwnBidHistory()
-					.getWorstBidDetails().getMyUndiscountedUtil();;
+		UserModel userModel = negotiationSession.getUserModel();
+		
+		if (userModel != null) {
+	
+			List<Bid> bidOrder = userModel.getBidRanking().getBidOrder();
+			
+			List<Bid> goodBids = bidOrder.subList((int) (bidOrder.size() * 0.7), bidOrder.size());
+			
+			if (goodBids.contains(negotiationSession.getOpponentBidHistory()
+					.getLastBidDetails().getBid())) {
+				return Actions.Accept;
+			}
+			else {
+				return Actions.Reject;
+			}
 		}
 		
-		if (isBetterThanNext || isBetterThanMyWorst || isGoodLastResort) {
-			return Actions.Accept;
-		} else {
-			return Actions.Reject;
+		else {
+			double lastOpponentBidUtil = negotiationSession.getOpponentBidHistory()
+					.getLastBidDetails().getMyUndiscountedUtil();
+			double bestOpponentBidUtil = negotiationSession.getOpponentBidHistory()
+					.getBestBidDetails().getMyUndiscountedUtil();
+			double nextMyBidUtil = offeringStrategy.getNextBid()
+					.getMyUndiscountedUtil();
+			boolean isBetterThanNext = lastOpponentBidUtil >= nextMyBidUtil;
+			boolean isGoodLastResort = negotiationSession.getTime() >= timeThreshold &&
+					a * bestOpponentBidUtil < lastOpponentBidUtil;
+			
+			boolean isBetterThanMyWorst = false;
+			if (negotiationSession.getOwnBidHistory().getWorstBidDetails() != null) { 
+				isBetterThanMyWorst = lastOpponentBidUtil >= negotiationSession.getOwnBidHistory()
+						.getWorstBidDetails().getMyUndiscountedUtil();;
+			}
+			
+			if (isBetterThanNext || isBetterThanMyWorst || isGoodLastResort) {
+				return Actions.Accept;
+			} else {
+				return Actions.Reject;
+			}
 		}
+		
 	}
 
 	@Override

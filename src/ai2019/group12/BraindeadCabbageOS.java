@@ -1,9 +1,11 @@
 package ai2019.group12;
 
 import java.util.List;
+
 import java.util.Map;
 import java.util.Random;
 
+import genius.core.Bid;
 import genius.core.bidding.BidDetails;
 import genius.core.boaframework.NegotiationSession;
 import genius.core.boaframework.NoModel;
@@ -11,6 +13,7 @@ import genius.core.boaframework.OMStrategy;
 import genius.core.boaframework.OfferingStrategy;
 import genius.core.boaframework.OpponentModel;
 import genius.core.misc.*;
+import genius.core.uncertainty.UserModel;
 import genius.core.boaframework.SortedOutcomeSpace;
 
 public class BraindeadCabbageOS extends OfferingStrategy {
@@ -42,25 +45,52 @@ public class BraindeadCabbageOS extends OfferingStrategy {
 	
 	@Override
 	public BidDetails determineOpeningBid() {
-		return negotiationSession.getMaxBidinDomain();
+		
+		UserModel userModel = negotiationSession.getUserModel();
+		
+		if (userModel != null) {
+			List<Bid> bidOrder = userModel.getBidRanking().getBidOrder();
+			return new BidDetails(bidOrder.get(bidOrder.size()-1), 0);
+		}
+		
+		else {
+			return negotiationSession.getMaxBidinDomain();
+		}	
 	}
-
+	
+	
 	@Override
 	public BidDetails determineNextBid() {
 		double time = negotiationSession.getTime();
-	
-		if (time <= timeThreshold) {
-			nextBid = getBidAboveThreshold();
+		
+		UserModel userModel = negotiationSession.getUserModel();
+		
+		//uncertain
+		if (userModel != null) {
+		
+			List<Bid> bidOrder = userModel.getBidRanking().getBidOrder();
+			
+			int currentRound = (int) negotiationSession.getTimeline().getCurrentTime();
+			
+			List<Bid> goodBids = bidOrder.subList((int) (bidOrder.size() * 0.7), bidOrder.size());
+			
+			return new BidDetails(goodBids.get(goodBids.size()-1 - currentRound % goodBids.size() ), 0);			
 		}
-		else if (!(opponentModel instanceof NoModel)){
-			nextBid = omStrategy.getBid(negotiationSession.getOutcomeSpace(), getRange());
-		}
+		
 		else {
-			nextBid = getLastMomentBid();
+	
+			if (time <= timeThreshold) {
+				nextBid = getBidAboveThreshold();
+			}
+			else if (!(opponentModel instanceof NoModel)){
+				nextBid = omStrategy.getBid(negotiationSession.getOutcomeSpace(), getRange());
+			}
+			else {
+				nextBid = getLastMomentBid();
+			}
+			
+			return nextBid;
 		}
-		
-		return nextBid;
-		
 	}
 	
 	/**
